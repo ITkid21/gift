@@ -1,0 +1,263 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Background Only</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #d63384;
+      margin: 0;
+      padding: 0;
+      color: #ffd6e8;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .open-button {
+      background-color: #ff69b4;  /* Pinkish button */
+      border: none;
+      color: white;
+      padding: 15px 30px;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px #ffb6d5, 0 0 18px 4px #ff69b4;
+      animation: btnGlow 1.5s infinite alternate;
+      transition: background-color 0.3s, transform 0.2s;
+      position: relative;
+      overflow: visible;
+    }
+    .open-button:hover {
+      background-color: #ff1493;  /* Darker pink on hover */
+      transform: scale(1.08);
+      animation: btnBounce 0.4s;
+    }
+    @keyframes btnGlow {
+      0% { box-shadow: 0 4px 16px #ffb6d5, 0 0 18px 4px #ff69b4; }
+      100% { box-shadow: 0 4px 32px #ffb6d5, 0 0 32px 8px #ff69b4; }
+    }
+    @keyframes btnBounce {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.15); }
+      60% { transform: scale(0.95); }
+      100% { transform: scale(1.08); }
+    }
+
+        #loveLetter {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ffe4e1;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .password-container {
+      background-color: #fff0f5;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 400px;
+      margin: 100px auto;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    input[type="password"] {
+      padding: 10px;
+      border: 1px solid #d63384;
+      border-radius: 8px;
+      width: 80%;
+    }
+
+    #checkPass {
+      background-color: #d63384;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    /* Removed duplicate body style */
+    .floating-letter {
+      position: absolute;
+      left: -200px;
+      top: 35vh;
+      animation: floatIn 2.5s cubic-bezier(.68,-0.55,.27,1.55) forwards;
+      z-index: 10;
+    }
+    @keyframes floatIn {
+      0% { left: -200px; opacity: 0; }
+      60% { left: 50vw; opacity: 1; }
+      100% { left: 45vw; opacity: 1; }
+    }
+    .envelope-img {
+      width: 260px;
+      max-width: 90vw;
+      cursor: pointer;
+      transition: transform 0.3s;
+      filter: drop-shadow(0 0 20px #ffb6d5);
+      background: #ffe6f0;
+      border-radius: 20px;
+      border: 3px solid #ff69b4;
+    }
+    .envelope-img:hover {
+      transform: scale(1.05) rotate(-2deg);
+      box-shadow: 0 0 30px #ff69b4;
+      border-color: #d63384;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.7) translate(-50%, -50%); opacity: 0; }
+      100% { transform: scale(1) translate(-50%, -50%); opacity: 1; }
+    }
+    #typewriter {
+      white-space: pre-wrap;
+      min-height: 120px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.2em;
+      color: #b1004b;
+      text-shadow: 0 0 8px #ffb6d5, 0 0 16px #ffb6d5, 0 0 24px #ff69b4;
+      font-weight: bold;
+    }
+  </style>
+</head>
+  <body>
+  <div id="passwordGate" class="password-container" style="display:none;">
+    <h2>🔐 Enter Your Special Password</h2>
+    <input type="password" id="passwordInput" placeholder="Password">
+    <br><br>
+    <button id="checkPass">Unlock Letter</button>
+    <p id="errorMsg" style="color: red;"></p>
+    <div style="margin-top:18px; color:#d63384; font-size:1.1em; font-weight:bold;">Riddle: What has keys but can't open locks?</div>
+  </div>
+  <div id="letter-popup" class="floating-letter">
+    <!-- Replace the src below with your own envelope photo if desired -->
+    <img src="envolep.jpg" alt="Envelope" class="envelope-img">
+  </div>
+  <!-- Riddle modal removed as requested -->
+  <div id="letter-content" class="letter-content" style="display:none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #ffd6e8 0%, #ffe6fa 100%); border-radius: 18px; box-shadow: 0 0 30px #ffb6d5; padding: 36px 32px; min-width: 320px; max-width: 90vw; min-height: 120px;">
+    <div id="typewriter" style="color: #b1004b; font-size: 1.2em; font-family: 'Courier New', Courier, monospace;"></div>
+    <a id="song-btn-link" href="song.html" style="display:none; position:relative;">
+      <button class="open-button" id="song-btn" style="margin-top:28px;">Go to Song Page</button>
+      <canvas id="confetti-burst" width="180" height="80" style="position:absolute; left:50%; top:0; transform:translateX(-50%); pointer-events:none; display:none;"></canvas>
+    </a>
+  </div>
+  <script>
+    // Confetti burst for button
+    function confettiBurst(canvas) {
+      const ctx = canvas.getContext('2d');
+      const colors = ["#ff69b4", "#ffd6e8", "#b1004b", "#ffe6fa", "#ffb6d5"];
+      let particles = [];
+      for (let i = 0; i < 24; i++) {
+        const angle = (Math.PI * 2) * (i / 24);
+        particles.push({
+          x: canvas.width/2,
+          y: canvas.height-10,
+          r: 5 + Math.random()*3,
+          color: colors[Math.floor(Math.random()*colors.length)],
+          vx: Math.cos(angle) * (2 + Math.random()*2),
+          vy: Math.sin(angle) * (2 + Math.random()*2) - 2,
+          alpha: 1
+        });
+      }
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for (let p of particles) {
+          ctx.globalAlpha = p.alpha;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+      function update() {
+        for (let p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.18;
+          p.alpha -= 0.025;
+        }
+        particles = particles.filter(p => p.alpha > 0);
+      }
+      function animate() {
+        draw();
+        update();
+        frame++;
+        if (particles.length > 0 && frame < 50) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0,0,canvas.width,canvas.height);
+          canvas.style.display = 'none';
+        }
+      }
+      animate();
+    }
+    // Typewriter effect function
+    function typeWriter(text, i, speed, element) {
+      if (i < text.length) {
+        element.innerHTML += text.charAt(i);
+        setTimeout(function() {
+          typeWriter(text, i + 1, speed, element);
+        }, speed);
+      } else {
+        // Show the song page button after letter is fully revealed
+        document.getElementById('song-btn-link').style.display = 'inline-block';
+        // Animate the button in
+        setTimeout(() => {
+          document.getElementById('song-btn').style.transform = 'scale(1.12)';
+          setTimeout(() => {
+            document.getElementById('song-btn').style.transform = '';
+          }, 350);
+        }, 200);
+      }
+    // Add confetti burst on button click
+    document.getElementById('song-btn').addEventListener('click', function(e) {
+      const confettiCanvas = document.getElementById('confetti-burst');
+      confettiCanvas.style.display = 'block';
+      confettiBurst(confettiCanvas);
+      // Let the confetti play for a short time before navigating
+      setTimeout(() => {
+        window.location = 'song.html';
+      }, 700);
+      e.preventDefault();
+    });
+    }
+
+    // Letter text
+    const letterText = `To the most wonderful sister,\n\nWishing you a birthday as bright and beautiful as your heart! May your year ahead be filled with endless smiles, sweet surprises, and all the love you bring to others.\n\nStay magical and keep shining!\n\nWith hugs and lots of love,\nAtharva`;
+
+    // On envelope click, show the password page
+    document.getElementById('letter-popup').onclick = function() {
+      document.getElementById('letter-popup').style.display = 'none';
+      document.getElementById('passwordGate').style.display = 'block';
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('errorMsg').innerText = '';
+    };
+
+    // Password check logic
+    const correctPassword = "piano"; // The riddle answer is now the password
+    document.getElementById('checkPass').onclick = function() {
+      const input = document.getElementById('passwordInput').value.trim().toLowerCase();
+      const errorMsg = document.getElementById('errorMsg');
+      if (input === '') {
+        errorMsg.innerText = 'Please enter the password.';
+        return;
+      }
+      if (input !== correctPassword) {
+        errorMsg.innerText = 'Incorrect password. Try again!';
+        return;
+      }
+      // Password correct, show letter
+      document.getElementById('passwordGate').style.display = 'none';
+      document.getElementById('letter-content').style.display = 'block';
+      document.getElementById('typewriter').innerHTML = '';
+      typeWriter(letterText, 0, 40, document.getElementById('typewriter'));
+    };
+  </script>
+</body>
+</html>

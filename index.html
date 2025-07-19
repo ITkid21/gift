@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome | Birthday Wishes</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #d63384;
+        margin: 0;
+        padding: 0;
+        color: #ffd6e8;
+        height: 100vh;
+        overflow: hidden;
+      
+
+      /* Confetti animation */
+      .confetti {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      /* Modal entrance animation */
+      .modal-animate {
+        animation: modalPopIn 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+      }
+      @keyframes modalPopIn {
+        0% { transform: scale(0.7) translateY(60px); opacity: 0; }
+        80% { transform: scale(1.05) translateY(-10px); opacity: 1; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+      }
+
+      /* Glowing button animation */
+      .continue-btn {
+        /* ...existing styles... */
+        box-shadow: 0 4px 16px #ffb6d5, 0 0 18px 4px #ff69b4;
+        animation: btnGlow 1.5s infinite alternate;
+      }
+      @keyframes btnGlow {
+        0% { box-shadow: 0 4px 16px #ffb6d5, 0 0 18px 4px #ff69b4; }
+        100% { box-shadow: 0 4px 32px #ffb6d5, 0 0 32px 8px #ff69b4; }
+      }
+
+      /* Floating heart animation */
+      .floating-heart {
+        position: fixed;
+        right: 6vw;
+        bottom: 8vh;
+        width: 70px;
+        height: 70px;
+        z-index: 5;
+        opacity: 0.7;
+        animation: floatHeart 4s ease-in-out infinite;
+      }
+      @keyframes floatHeart {
+        0% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-30px) scale(1.08); }
+        100% { transform: translateY(0) scale(1); }
+      }
+      }
+      .intro-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #ffd6e8 0%, #ffe6fa 100%);
+        border-radius: 18px;
+        box-shadow: 0 0 30px #ffb6d5;
+        padding: 40px 36px;
+        min-width: 320px;
+        max-width: 90vw;
+        min-height: 120px;
+        z-index: 1000;
+        border: 2px solid #b1004b;
+        text-align: center;
+      }
+      .intro-title {
+        color: #b1004b;
+        font-size: 2.2em;
+        font-weight: bold;
+        margin-bottom: 18px;
+        text-shadow: 0 0 8px #ffb6d5, 0 0 16px #ffb6d5, 0 0 24px #ff69b4;
+      }
+      .intro-message {
+        color: #b1004b;
+        font-size: 1.2em;
+        margin-bottom: 28px;
+        font-weight: 500;
+      }
+      .continue-btn {
+        background-color: #ff69b4;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 36px;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 16px #ffb6d5;
+        transition: background 0.2s, transform 0.2s;
+      }
+      .continue-btn:hover {
+        background: #d63384;
+        transform: scale(1.05);
+      }
+    </style>
+</head>
+<body>
+  <!-- Intro message block removed; now shown as popups -->
+  <div class="intro-content" id="main-intro" style="display:none;">
+    <div class="intro-title">Happy Birthday, Afreen Didi! 🎉</div>
+    <div class="intro-message">
+     first lets open your birthaday letter...💌<br><br>
+      Click below to begin your journey!
+    </div>
+    <a href="final_ltter.html"><button class="continue-btn">Let's first open your letter</button></a>
+  </div>
+
+  <!-- Confetti Canvas -->
+  <canvas class="confetti" id="confetti-canvas"></canvas>
+
+  <!-- Floating Heart SVG -->
+  <svg class="floating-heart" viewBox="0 0 100 100">
+    <path d="M50 80 Q20 60 20 35 Q20 15 50 25 Q80 15 80 35 Q80 60 50 80 Z" fill="#ff69b4" stroke="#b1004b" stroke-width="3"/>
+    <animateTransform attributeName="transform" type="scale" values="1;1.08;1" dur="2s" repeatCount="indefinite"/>
+  </svg>
+
+  <!-- Popup Modal for sequential messages -->
+  <div id="popup-modal" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(214,51,132,0.18); z-index:2000; display:flex; align-items:center; justify-content:center;">
+    <div id="popup-inner" class="modal-animate" style="background:linear-gradient(135deg,#ffd6e8 0%,#ffe6fa 100%); border-radius:18px; box-shadow:0 0 30px #ffb6d5; padding:36px 32px; min-width:320px; max-width:90vw; min-height:120px; border:2px solid #b1004b; text-align:center;">
+      <div id="popup-message" style="color:#b1004b; font-size:1.25em; font-weight:bold; min-height:3em;"></div>
+      <button id="next-popup" class="continue-btn" style="margin-top:24px;">Next</button>
+    </div>
+  </div>
+</body>
+<script>
+  // Confetti animation
+  const confettiColors = ["#ff69b4", "#ffd6e8", "#b1004b", "#ffe6fa", "#ffb6d5"];
+  const confettiCount = 60;
+  const confetti = [];
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+  for (let i = 0; i < confettiCount; i++) {
+    confetti.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * -canvas.height,
+      r: 6 + Math.random() * 10,
+      d: 2 + Math.random() * 2,
+      color: confettiColors[Math.floor(Math.random() * confettiColors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngle: 0,
+      tiltAngleInc: (Math.random() * 0.07) + 0.02
+    });
+  }
+  function drawConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < confetti.length; i++) {
+      let c = confetti[i];
+      ctx.beginPath();
+      ctx.ellipse(c.x, c.y, c.r, c.r * 0.6, c.tilt, 0, 2 * Math.PI);
+      ctx.fillStyle = c.color;
+      ctx.globalAlpha = 0.85;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    updateConfetti();
+    requestAnimationFrame(drawConfetti);
+  }
+  function updateConfetti() {
+    for (let i = 0; i < confetti.length; i++) {
+      let c = confetti[i];
+      c.y += c.d;
+      c.tiltAngle += c.tiltAngleInc;
+      c.tilt = Math.sin(c.tiltAngle) * 10;
+      c.x += Math.sin(c.tiltAngle) * 1.2;
+      if (c.y > canvas.height + 20) {
+        c.x = Math.random() * canvas.width;
+        c.y = -10;
+        c.r = 6 + Math.random() * 10;
+        c.d = 2 + Math.random() * 2;
+        c.color = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+      }
+    }
+  }
+  drawConfetti();
+
+  // Popup messages to show one by one
+  const popupMessages = [
+    "Hi Afreen Didi,",
+    "Welcome to this special web page, crafted just for you. Here, you will discover not only some amazing messages that come straight from my heart but also my deepest feelings for you.",
+    "You mean so much to me, and I wanted to express that in a memorable way.",
+    "As you explore this page, you will also find a special gift that I have personally made for you, filled with love and thoughtfulness.",
+    "I hope it brings a smile to your face and warmth to your heart, just as you have brought joy into my life.",
+    "Wishing you all the happiness in the world, today and always. You truly deserve it!"
+  ];
+  let popupIndex = 0;
+  const popupModal = document.getElementById('popup-modal');
+  const popupMsgDiv = document.getElementById('popup-message');
+  const nextBtn = document.getElementById('next-popup');
+  const mainIntro = document.getElementById('main-intro');
+  const popupInner = document.getElementById('popup-inner');
+
+  function showPopupMsg(idx) {
+    popupMsgDiv.innerText = popupMessages[idx];
+    popupInner.classList.remove('modal-animate');
+    void popupInner.offsetWidth; // trigger reflow for animation
+    popupInner.classList.add('modal-animate');
+    if (idx === popupMessages.length - 1) {
+      nextBtn.innerText = 'Continue';
+    } else {
+      nextBtn.innerText = 'Next';
+    }
+  }
+  showPopupMsg(popupIndex);
+
+  nextBtn.onclick = function() {
+    popupIndex++;
+    if (popupIndex < popupMessages.length) {
+      showPopupMsg(popupIndex);
+    } else {
+      popupModal.style.display = 'none';
+      mainIntro.style.display = 'block';
+    }
+  };
+</script>
+</body>
+</html>
